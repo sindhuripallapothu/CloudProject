@@ -17,9 +17,11 @@ def allowed_file(filename):
 	return '.' in filename and \
 		filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-
-# PAGE REDIRECTS
-
+'''
+-----------------------------------------------------------
+					PAGE REDIRECTS
+-----------------------------------------------------------
+'''
 def post_upload_redirect():
 	return render_template('post-upload.html')
 
@@ -38,9 +40,11 @@ def index():
 @app.route('/upload-file')
 def call_page_upload():
 	return render_template('upload.html')
-
-# DOWNLOAD KEY-FILE
-
+'''
+-----------------------------------------------------------
+				DOWNLOAD KEY-FILE
+-----------------------------------------------------------
+'''
 @app.route('/public-key-directory/retrieve/key/<username>')
 def download_public_key(username):
 	for root,dirs,files in os.walk('./media/public-keys/'):
@@ -58,7 +62,11 @@ def download_file(filename):
 	else:
 		return render_template('file-list.html',msg='An issue encountered, our team is working on that')
 
-
+'''
+-----------------------------------------------------------
+		BUILD - DISPLAY FILE - KEY DIRECTORY
+-----------------------------------------------------------
+'''
 # Build public key directory
 @app.route('/public-key-directory/')
 def downloads_pk():
@@ -81,7 +89,11 @@ def download_f():
 		else:
 			return render_template('file-list.html',msg='',itr=0,length=len(files),list=files)
 
-
+'''
+-----------------------------------------------------------
+				UPLOAD ENCRYPTED FILE
+-----------------------------------------------------------
+'''
 
 @app.route('/data', methods=['GET', 'POST'])
 def upload_file():
@@ -102,13 +114,17 @@ def upload_file():
 			return post_upload_redirect()
 		return 'Invalid File Format !'
 
-
+'''
+-----------------------------------------------------------
+REGISTER UNIQUE USERNAME AND GENERATE PUBLIC KEY WITH FILE
+-----------------------------------------------------------
+'''
 @app.route('/register-new-user', methods = ['GET', 'POST'])
 def register_user():
 	files = []
 	privatekeylist = []
 	usernamelist = []
-	
+	# Import pickle file to maintain uniqueness of the keys
 	if(os.path.isfile("./media/database/database.pickle")):
 		pickleObj = open("./media/database/database.pickle","rb")
 		privatekeylist = pickle.load(pickleObj)
@@ -117,7 +133,7 @@ def register_user():
 		pickleObj = open("./media/database/database_1.pickle","rb")
 		usernamelist = pickle.load(pickleObj)
 		pickleObj.close()
-	
+	# Declare a new list which consists all usernames 
 	if request.form['username'] in usernamelist:
 		return render_template('register.html', name='Username already exists')
 	username = request.form['username']
@@ -125,7 +141,7 @@ def register_user():
 	secondname = request.form['last-name']
 	pin = int(random.randint(1,128))
 	pin = pin % 64
-	
+	#Generating a unique private key
 	privatekey = DH.generate_private_key(pin)
 	while privatekey in privatekeylist:
 		privatekey = DH.generate_private_key(pin)
@@ -138,9 +154,9 @@ def register_user():
 	pickleObj = open("./media/database/database_1.pickle","wb")
 	pickle.dump(usernamelist,pickleObj)
 	pickleObj.close()
-	
+	#Updating a new public key for a new user
 	filename = UPLOAD_KEY+username+'-'+secondname.upper()+firstname.lower()+'-PublicKey.pem'
-	
+	# Generate public key and save it in the file generated
 	publickey = DH.generate_public_key(privatekey)
 	fileObject = open(filename,"w")
 	fileObject.write(str(publickey))
@@ -149,4 +165,5 @@ def register_user():
 
 	
 if __name__ == '__main__':
-	app.run(host = "0.0.0.0", port = "80")
+	#app.run(host="0.0.0.0", port=80)
+	app.run()
