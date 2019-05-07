@@ -37,6 +37,10 @@ def back_home():
 def index():
 	return render_template('index.html')
 
+@app.route('/file-directory')
+def call_page_upload():
+	return render_template('file-list.html')
+
 @app.route('/upload-file')
 def call_page_upload():
 	return render_template('upload.html')
