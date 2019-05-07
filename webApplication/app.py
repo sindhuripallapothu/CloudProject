@@ -6,7 +6,7 @@ import DH
 import pickle
 import random
 
-UPLOAD_FOLDER = './media/text-files/'
+UPLOAD_FOLDER = './media/textFiles/'
 UPLOAD_KEY = './media/public-keys/'
 ALLOWED_EXTENSIONS = set(['txt'])
 
